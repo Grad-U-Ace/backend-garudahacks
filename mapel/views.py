@@ -1,61 +1,36 @@
-from django.shortcuts import render, get_object_or_404
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import viewsets
+from .models import Mapel, Topic, Activity, Modul, Exercise, Soal
+from .serializers import MapelSerializer, TopicSerializer, ActivitySerializer, ModulSerializer, ExerciseSerializer, SoalSerializer
 
-from mapel.models import Mapel, Topic
-from mapel.serializers import MapelSerializer, TopicSerializer
-
-
-# Create your views here.
-class MapelViewSet(viewsets.ViewSet):
+class MapelViewSet(viewsets.ModelViewSet):
+    queryset = Mapel.objects.all()
     serializer_class = MapelSerializer
 
-    def list(self, request,):
-        queryset = Mapel.objects.filter()
-        serializer = MapelSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Mapel.objects.filter()
-        client = get_object_or_404(queryset, pk=pk)
-        serializer = MapelSerializer(client)
-        return Response(serializer.data)
-
-    def create(self, request):
-        serializer = MapelSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def destroy(self, request, pk=None):
-        queryset = Mapel.objects.filter(pk=pk)
-        mapel = get_object_or_404(queryset, pk=pk)
-        mapel.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class TopicViewSet(viewsets.ViewSet):
+class TopicViewSet(viewsets.ModelViewSet):
+    queryset = Topic.objects.all()
     serializer_class = TopicSerializer
 
-    def list(self, request, mapel_pk=None):
-        queryset = Topic.objects.filter(mapel=mapel_pk)
-        serializer = TopicSerializer(queryset, many=True)
-        return Response(serializer.data)
+class ActivityViewSet(viewsets.ModelViewSet):
+    queryset = Activity.objects.all()
+    serializer_class = ActivitySerializer
 
-    def retrieve(self, request, pk=None, mapel_pk=None):
-        queryset = Topic.objects.filter(pk=pk, mapel=mapel_pk)
-        topic = get_object_or_404(queryset, pk=pk)
-        serializer = TopicSerializer(topic)
-        return Response(serializer.data)
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            obj = self.get_object()
+            if obj.type == 'modul':
+                return ModulSerializer
+            elif obj.type == 'exercise':
+                return ExerciseSerializer
+        return self.serializer_class
 
-    def create(self, request, mapel_pk=None):
-        serializer = TopicSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+class ModulViewSet(viewsets.ModelViewSet):
+    queryset = Modul.objects.all()
+    serializer_class = ModulSerializer
 
-    def destroy(self, request, pk=None, mapel_pk=None):
-        queryset = Topic.objects.filter(pk=pk, mapel=mapel_pk)
-        topic = get_object_or_404(queryset, pk=pk)
-        topic.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class ExerciseViewSet(viewsets.ModelViewSet):
+    queryset = Exercise.objects.all()
+    serializer_class = ExerciseSerializer
+
+class SoalViewSet(viewsets.ModelViewSet):
+    queryset = Soal.objects.all()
+    serializer_class = SoalSerializer
