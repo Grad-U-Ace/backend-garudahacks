@@ -12,7 +12,7 @@ class SoalSerializer(serializers.ModelSerializer):
 class ModulSerializer(serializers.ModelSerializer):
     class Meta:
         model = Modul
-        fields = ['id', 'title', 'file', 'type', 'topic']
+        fields = ['id', 'title', 'file', 'type', 'topic', 'content_suggestion']
         read_only_fields = ['type']
 
 

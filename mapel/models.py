@@ -29,6 +29,7 @@ class Activity(models.Model):
 
 class Modul(Activity):
     file = models.FileField(upload_to='modules', null=True, blank=True)
+    content_suggestion = models.TextField(blank=True)
 
     def save(self, *args, **kwargs):
         self.type = 'modul'

@@ -71,7 +71,12 @@ class ModulViewSet(viewsets.ModelViewSet):
         if not generated_content:
             return Response({"error": "Failed to generate content"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response({"content": generated_content}, status=status.HTTP_200_OK)
+        modul.content_suggestion = generated_content
+        modul.save()
+
+        serializer = self.get_serializer(modul)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 def generate_questions(topic, title, description, num_questions=5):
