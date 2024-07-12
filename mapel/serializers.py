@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from .models import Mapel, Topic, Activity, Modul, Exercise, Soal
 
@@ -8,16 +9,11 @@ class SoalSerializer(serializers.ModelSerializer):
         fields = ['id', 'question', 'answer', 'used']
 
 
-class ActivitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Activity
-        fields = ['id', 'title', 'type']
-
-
 class ModulSerializer(serializers.ModelSerializer):
     class Meta:
         model = Modul
-        fields = ['id', 'title', 'file', 'type']
+        fields = ['id', 'title', 'file', 'type', 'topic']
+        read_only_fields = ['type']
 
 
 class ExerciseSerializer(serializers.ModelSerializer):
@@ -25,7 +21,14 @@ class ExerciseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exercise
-        fields = ['id', 'title', 'description', 'type', 'soal_set']
+        fields = ['id', 'title', 'description', 'type', 'topic', 'soal_set']
+        read_only_fields = ['type']
+
+
+class ActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activity
+        fields = ['id', 'title', 'type']
 
 
 class TopicSerializer(serializers.ModelSerializer):

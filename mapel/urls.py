@@ -10,8 +10,11 @@ mapel_router.register(r'topics', TopicViewSet, basename='mapel-topics')
 
 topic_router = routers.NestedDefaultRouter(mapel_router, r'topics', lookup='topic')
 topic_router.register(r'activities', ActivityViewSet, basename='topic-activities')
+topic_router.register(r'moduls', ModulViewSet, basename='topic-moduls')
+topic_router.register(r'exercises', ExerciseViewSet, basename='topic-exercises')
 
-exercise_router = routers.NestedDefaultRouter(topic_router, r'activities', lookup='activity')
+
+exercise_router = routers.NestedDefaultRouter(topic_router, r'exercises', lookup='exercise')
 exercise_router.register(r'soal', SoalViewSet, basename='exercise-soal')
 
 urlpatterns = [

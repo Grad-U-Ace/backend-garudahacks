@@ -19,14 +19,9 @@ class Topic(models.Model):
         return self.name
 
 class Activity(models.Model):
-    ACTIVITY_TYPES = (
-        ('modul', 'Modul'),
-        ('exercise', 'Exercise'),
-    )
-    id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=100)
     topic = models.ForeignKey('Topic', related_name='activities', on_delete=models.CASCADE)
-    type = models.CharField(max_length=10, choices=ACTIVITY_TYPES)
+    type = models.CharField(max_length=10, choices=[('modul', 'Modul'), ('exercise', 'Exercise')])
 
     def __str__(self):
         return self.title
@@ -39,18 +34,24 @@ class Modul(Activity):
         self.type = 'modul'
         super().save(*args, **kwargs)
 
+
 class Exercise(Activity):
     description = models.TextField()
+
+    class Meta:
+        proxy = False
 
     def save(self, *args, **kwargs):
         self.type = 'exercise'
         super().save(*args, **kwargs)
 
+
 class Soal(models.Model):
     question = models.TextField()
     answer = models.TextField()
     used = models.BooleanField(default=False)
-    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    exercise = models.ForeignKey(Exercise, related_name='soal_set', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.question
+
