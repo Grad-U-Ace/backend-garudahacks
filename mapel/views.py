@@ -20,6 +20,21 @@ class ActivityViewSet(viewsets.ModelViewSet):
     queryset = Activity.objects.all()
     serializer_class = ActivitySerializer
 
+def generate_module_content(prompt, content_type='handout', num_sections=5):
+    try:
+        client = OpenAI()
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": f"You are a helpful assistant that generates content for {content_type}s."},
+                {"role": "user", "content": f"Generate an outline with {num_sections} main sections for a {content_type} about the following topic: {prompt}. For each section, provide a brief description or key points."}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Error calling OpenAI API: {e}")
+        return None
+
 
 class ModulViewSet(viewsets.ModelViewSet):
     serializer_class = ModulSerializer
@@ -44,6 +59,19 @@ class ModulViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(detail=True, methods=['post'])
+    def generate_content(self, request, mapel_pk=None, topic_pk=None, pk=None):
+        modul = self.get_object()
+        prompt = request.data.get('prompt', modul.title)
+        content_type = request.data.get('content_type', 'handout')
+        num_sections = request.data.get('num_sections', 5)
+
+        generated_content = generate_module_content(prompt, content_type, num_sections)
+        if not generated_content:
+            return Response({"error": "Failed to generate content"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"content": generated_content}, status=status.HTTP_200_OK)
 
 
 def generate_questions(topic, title, description, num_questions=5):

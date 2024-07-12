@@ -28,7 +28,7 @@ class Activity(models.Model):
 
 
 class Modul(Activity):
-    file = models.FileField(upload_to='modules')
+    file = models.FileField(upload_to='modules', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.type = 'modul'
