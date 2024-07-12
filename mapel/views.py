@@ -1,5 +1,6 @@
 import openai
 from django.db import transaction
+from openai import OpenAI
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -44,18 +45,24 @@ class ModulViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-def generate_questions(prompt, num_questions=5):
+
+def generate_questions(topic, title, description, num_questions=5):
+    prompt = f"Generate {num_questions} questions for an exercise. Topic: {topic}. Exercise title: {title}. Exercise description: {description}. Format each question-answer pair as 'Q: [question] A: [answer]' in a single string."
+
     try:
-        response = openai.ChatCompletion.create(
+        client = OpenAI()
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that generates quiz questions."},
-                {"role": "user", "content": f"Generate {num_questions} questions and answers about the following topic: {prompt}. Format each question-answer pair as 'Q: [question] A: [answer]'."}
+                {"role": "system", "content": "You are a helpful assistant that generates educational questions."},
+                {"role": "user", "content": prompt}
             ]
         )
-        return response.choices[0].message['content'].strip().split('\n')
+
+        # Parse the response and convert it to a list of dictionaries
+        return response.choices[0].message.content.strip().split('\n')
     except Exception as e:
-        print(f"Error calling OpenAI API: {e}")
+        print(f"Error generating questions: {e}")
         return None
 
 
@@ -84,15 +91,17 @@ class ExerciseViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(detail=True, methods=['post'])
-    def generate_soal(self, request, mapel_pk=None, topic_pk=None, pk=None):
+    def generate_questions(self, request, mapel_pk=None, topic_pk=None, pk=None):
         exercise = self.get_object()
-        prompt = request.data.get('prompt', exercise.title)
+        topic = exercise.topic.name
         num_questions = request.data.get('num_questions', 5)
 
-        generated_questions = generate_questions(prompt, num_questions)
+        generated_questions = generate_questions(topic, exercise.title, exercise.description, num_questions)
+
         if not generated_questions:
             return Response({"error": "Failed to generate questions"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        print(generated_questions)
         created_soal = []
         for q_and_a in generated_questions:
             question, answer = q_and_a.split('A:')
