@@ -1,5 +1,9 @@
 # Guruda-Backend
+https://guruda-api-kv422ek6cq-et.a.run.app
 
+Deployed with cloud run.
+
+API Docs: https://guruda-api-kv422ek6cq-et.a.run.app/api/schema/swagger-ui/
 
 ## Development Guide
 1. create and run the virtual environment
@@ -43,5 +47,3 @@
    ```
    Should be accessible from http://localhost:8000/
 
-## Jangan lupa dokumentasikan library sebelum push
-`pip freeze > requirements.txt`
